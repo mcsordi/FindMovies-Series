@@ -78,7 +78,7 @@ input {
   margin-top: 10px;
 }
 .showContentContainer {
-  display: flex;
+  display: none;
   width: 40%;
   max-height: 500px;
   top: 58%;
@@ -104,4 +104,10 @@ input {
 .nameMoviePoster {
   width: 100%;
   text-align: center;
+}
+.hidden {
+  visibility: hidden;
+}
+.visible {
+  visibility: visible;
 }
