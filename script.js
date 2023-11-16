@@ -3,6 +3,8 @@ let input = document.getElementById("searchInput");
 let valueInput = null;
 let img = document.getElementById("imgMovie");
 let searchMoviesDiv = document.getElementById("showMovies");
+let infoTextMovie = document.getElementById("info");
+let resturnTextMovies = document.getElementById("movieInfos");
 
 /*const response = () => {
   let api = `http://www.omdbapi.com/?s=${valueInput}&apikey=${apikey}`;
@@ -18,7 +20,7 @@ const clickContainer = () => {
   document.addEventListener("click", (evt) => {
     let target = evt.target.className;
     let idTarget = evt.target.id;
-    console.log("document.addEventListener ~ idTarget:", idTarget);
+
     let view = document.getElementById("showContent");
 
     if (
@@ -37,7 +39,7 @@ const hiddenList = (response) => {
   let listMovies = document.getElementById("showContent");
 
   let trueResponse = response.Response;
-  console.log("hiddenList ~ trueResponse:", trueResponse);
+
   if (trueResponse === "True") {
     listMovies.style.display = "flex";
   } else {
@@ -52,6 +54,7 @@ const onloadMovie = (movieName, display) => {
     .then((response) => response.json())
     .then((data) => {
       img.innerHTML = "";
+      resturnTextMovies.innerHTML = "";
       let image = document.createElement("img");
       let divStars = document.createElement("div");
       let divRating = document.createElement("div");
@@ -62,10 +65,26 @@ const onloadMovie = (movieName, display) => {
       let paragraphRating = document.createElement("p");
       divRating.setAttribute("class", "ratingContainer");
       divStars.setAttribute("class", "starsContent");
-
       let icon1 = document.createElement("i");
       let icon2 = document.createElement("i");
       let icon3 = document.createElement("i");
+      let divTitle = document.createElement("div");
+      let pTitle = document.createElement("p");
+      let pYear = document.createElement("p");
+      let divGenre = document.createElement("div");
+      let plotDiv = document.createElement("div");
+      let pPlot = document.createElement("p");
+      let starsDiv = document.createElement("div");
+      let pStars = document.createElement("p");
+      let runTime = document.createElement("div");
+      let pRuntime = document.createElement("p");
+      let pType = document.createElement("p");
+      let pRated = document.createElement("p");
+      let writer = document.createElement("div");
+      let pWriter = document.createElement("p");
+      let director = document.createElement("div");
+      let pDirector = document.createElement("p");
+
       icon1.setAttribute("class", "fa-solid fa-star");
       icon1.style.color = "yellow";
       icon1.style.fontSize = "15px";
@@ -85,6 +104,60 @@ const onloadMovie = (movieName, display) => {
       paragraphRating.append(data.imdbRating);
       divRating.appendChild(paragraphRating);
       img.appendChild(divRating);
+      pTitle.append(data.Title);
+      pTitle.style.fontSize = "30px";
+      let yearMovie = `(${data.Year})`;
+      pYear.append(yearMovie);
+      divTitle.append(pTitle);
+      divTitle.append(pYear);
+      pYear.setAttribute("class", "marginLeft");
+      divTitle.setAttribute("class", "yearTitle");
+      let genres = data.Genre;
+      let splitGenres = genres.split(",");
+      resturnTextMovies.append(divTitle);
+      splitGenres.map((element) => {
+        let eachDiv = document.createElement("div");
+        let pGenre = document.createElement("p");
+        eachDiv.setAttribute("class", "widhtGenre");
+        divGenre.setAttribute("class", "rowContainer");
+        pGenre.append(element);
+        eachDiv.append(pGenre);
+        divGenre.append(eachDiv);
+        resturnTextMovies.append(divGenre);
+      });
+      pPlot.append(data.Plot);
+      pPlot.setAttribute("class", "alightStart");
+      plotDiv.append(pPlot);
+      plotDiv.setAttribute("class", "marginTop");
+      pStars.append(`Stars: ${data.Actors}`);
+      pStars.setAttribute("class", "marginTop");
+      pStars.style.textAlign = "start";
+
+      starsDiv.append(pStars);
+      starsDiv.style.width = "100%";
+      pType.append(data.Type);
+      pRated.append(data.Rated);
+      pRuntime.append(data.Runtime);
+      pType.setAttribute("class", "infoParagraph");
+      pRated.setAttribute("class", "infoParagraph");
+      pRuntime.setAttribute("class", "infoParagraph");
+      runTime.append(pType, pRuntime, pRated);
+      runTime.setAttribute("class", "infosTime");
+      let nameWriter = `Writer: ${data.Writer}`;
+      pWriter.append(nameWriter);
+      writer.append(pWriter);
+      writer.style.display = "flex";
+      let nameDirector = `Director: ${data.Director}`;
+      pWriter.setAttribute("class", "alightStart");
+      pWriter.style.marginTop = "10px";
+      writer.style.width = "100%";
+      pDirector.setAttribute("class", "alightStart");
+      pDirector.style.marginTop = "10px";
+      pDirector.append(nameDirector);
+      director.append(pDirector);
+      director.style.display = "flex";
+      director.style.width = "100%";
+      resturnTextMovies.append(plotDiv, runTime, starsDiv, writer, director);
     });
 };
 
@@ -126,7 +199,6 @@ const loadListMovies = () => {
             if (evt.target.id == "") {
               child = evt.target.parentNode.id;
               onloadMovie(`i=${child}`);
-              console.log(child);
             } else {
               child = evt.target.id;
               onloadMovie(`i=${child}`, "flex");
