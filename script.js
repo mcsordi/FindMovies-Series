@@ -22,15 +22,21 @@ const clickContainer = () => {
     let idTarget = evt.target.id;
 
     let view = document.getElementById("showContent");
+    view.style.display = "flex";
+    let setTimeName = input.value;
 
     if (
-      target != "infoMovies" ||
-      target != "nameMoviePoster" ||
-      target != "posterImage" ||
+      target != "infoMovies" &&
+      target != "nameMoviePoster" &&
+      target != "posterImage" &&
       idTarget != "searchInput"
     ) {
       input.value = "";
       view.style.display = "none";
+    } else if (setTimeName == "") {
+      view.style.display = "none";
+    } else {
+      view.style.display = "flex";
     }
   });
 };
@@ -48,7 +54,7 @@ const hiddenList = (response) => {
   clickContainer();
 };
 
-const onloadMovie = (movieName, display) => {
+const onloadMovie = (movieName) => {
   let api = `http://www.omdbapi.com/?${movieName}&apikey=${apikey}`;
   fetch(api)
     .then((response) => response.json())
@@ -58,10 +64,7 @@ const onloadMovie = (movieName, display) => {
       let image = document.createElement("img");
       let divStars = document.createElement("div");
       let divRating = document.createElement("div");
-      let divShowMoviesSeries = document.createElement("div");
-      divShowMoviesSeries.setAttribute("class", "showContentContainer");
-      divShowMoviesSeries.setAttribute("id", "showContent");
-      divShowMoviesSeries.style.display = display;
+      let showMovies = document.getElementById("showContent");
       let paragraphRating = document.createElement("p");
       divRating.setAttribute("class", "ratingContainer");
       divStars.setAttribute("class", "starsContent");
@@ -96,14 +99,16 @@ const onloadMovie = (movieName, display) => {
       image.setAttribute("src", `${data.Poster}`);
       image.setAttribute("class", "positionImage");
       img.appendChild(image);
-      searchMoviesDiv.appendChild(divShowMoviesSeries);
+      searchMoviesDiv.append(showMovies);
       divStars.appendChild(icon1);
       divStars.appendChild(icon2);
       divStars.appendChild(icon3);
       img.appendChild(divStars);
-      paragraphRating.append(data.imdbRating);
-      divRating.appendChild(paragraphRating);
-      img.appendChild(divRating);
+      if (data.imdbRating != "N/A") {
+        paragraphRating.append(data.imdbRating);
+        divRating.appendChild(paragraphRating);
+        img.appendChild(divRating);
+      }
       pTitle.append(data.Title);
       pTitle.style.fontSize = "30px";
       let yearMovie = `(${data.Year})`;
@@ -125,27 +130,38 @@ const onloadMovie = (movieName, display) => {
         divGenre.append(eachDiv);
         resturnTextMovies.append(divGenre);
       });
-      pPlot.append(data.Plot);
-      pPlot.setAttribute("class", "alightStart");
-      plotDiv.append(pPlot);
-      plotDiv.setAttribute("class", "marginTop");
+      if (data.Plot != "N/A") {
+        pPlot.append(data.Plot);
+        pPlot.setAttribute("class", "alightStart");
+        plotDiv.append(pPlot);
+        plotDiv.setAttribute("class", "marginTop");
+        resturnTextMovies.append(plotDiv);
+      }
       pStars.append(`Stars: ${data.Actors}`);
       pStars.setAttribute("class", "marginTop");
       pStars.style.textAlign = "start";
 
       starsDiv.append(pStars);
       starsDiv.style.width = "100%";
-      pType.append(data.Type);
-      pRated.append(data.Rated);
-      pRuntime.append(data.Runtime);
-      pType.setAttribute("class", "infoParagraph");
-      pRated.setAttribute("class", "infoParagraph");
-      pRuntime.setAttribute("class", "infoParagraph");
+      if (data.Type != "N/A") {
+        pType.setAttribute("class", "infoParagraph");
+        pType.append(data.Type);
+      }
+
+      if (data.Rated != "N/A") {
+        pRated.setAttribute("class", "infoParagraph");
+        pRated.append(data.Rated);
+      }
+
+      if (data.Runtime != "N/A") {
+        pRuntime.append(data.Runtime);
+        pRuntime.setAttribute("class", "infoParagraph");
+      }
+
       runTime.append(pType, pRuntime, pRated);
       runTime.setAttribute("class", "infosTime");
       let nameWriter = `Writer: ${data.Writer}`;
-      pWriter.append(nameWriter);
-      writer.append(pWriter);
+
       writer.style.display = "flex";
       let nameDirector = `Director: ${data.Director}`;
       pWriter.setAttribute("class", "alightStart");
@@ -153,11 +169,19 @@ const onloadMovie = (movieName, display) => {
       writer.style.width = "100%";
       pDirector.setAttribute("class", "alightStart");
       pDirector.style.marginTop = "10px";
-      pDirector.append(nameDirector);
-      director.append(pDirector);
       director.style.display = "flex";
       director.style.width = "100%";
-      resturnTextMovies.append(plotDiv, runTime, starsDiv, writer, director);
+      resturnTextMovies.append(runTime, starsDiv);
+      if (nameWriter != `Writer: N/A`) {
+        pWriter.append(nameWriter);
+        writer.append(pWriter);
+        resturnTextMovies.append(writer);
+      }
+      if (nameDirector != `Director: N/A`) {
+        pDirector.append(nameDirector);
+        director.append(pDirector);
+        resturnTextMovies.append(director);
+      }
     });
 };
 
@@ -165,48 +189,58 @@ const loadListMovies = () => {
   let endpoint = `http://www.omdbapi.com/?s=${valueInput}&apikey=${apikey}`;
   fetch(endpoint)
     .then((response) => response.json())
+
     .then((data) => {
       hiddenList(data);
+
       let contentPostWrite = document.getElementById("showContent");
       contentPostWrite.innerHTML = "";
-
       try {
-        for (let i of data.Search) {
-          if (i.Poster != "N/A") {
+        let searchContent = data.Search;
+
+        searchContent.map((el) => {
+          let poster = el.Poster;
+
+          if (poster !== `N/A`) {
             let divPosterMovies = document.createElement("div");
             let nameMovie = document.createElement("p");
             nameMovie.setAttribute("class", "nameMoviePoster");
             divPosterMovies.setAttribute("class", "infoMovies");
-            divPosterMovies.setAttribute("id", `${i.imdbID}`);
+            divPosterMovies.setAttribute("id", `${el.imdbID}`);
+
             let posterFilm = document.createElement("img");
-            posterFilm.setAttribute("src", `${i.Poster}`);
+            posterFilm.setAttribute("src", `${el.Poster}`);
             posterFilm.setAttribute("class", "posterImage");
             divPosterMovies.append(posterFilm);
-            nameMovie.append(`${i.Title}`);
+
+            nameMovie.append(`${el.Title}`);
             divPosterMovies.append(nameMovie);
             contentPostWrite.append(divPosterMovies);
           }
-        }
-      } catch (error) {
-        return error;
-      }
-
-      const showThem = [...document.querySelectorAll(".infoMovies")];
-      const loadList = () => {
-        showThem.map((el) => {
-          el.addEventListener("click", (evt) => {
-            let child = null;
-            if (evt.target.id == "") {
-              child = evt.target.parentNode.id;
-              onloadMovie(`i=${child}`);
-            } else {
-              child = evt.target.id;
-              onloadMovie(`i=${child}`, "flex");
-            }
-          });
         });
-      };
-      loadList();
+
+        const showThem = [...document.querySelectorAll(".infoMovies")];
+        const loadList = () => {
+          showThem.map((el) => {
+            el.addEventListener("click", (evt) => {
+              let child = null;
+              if (evt.target.id == "") {
+                child = evt.target.parentNode.id;
+                console.log("el.addEventListener ~ child:", child);
+
+                onloadMovie(`i=${child}`);
+              } else {
+                child = evt.target.id;
+
+                onloadMovie(`i=${child}`);
+              }
+            });
+          });
+        };
+        loadList();
+      } catch (error) {
+        return;
+      }
     });
 };
 
@@ -218,7 +252,7 @@ document.addEventListener(
 
 const keyDownMovie = () => {
   document.addEventListener("keyup", () => {
-    valueInput = input.value;
+    valueInput = input.value.trim();
     loadListMovies();
   });
 };
