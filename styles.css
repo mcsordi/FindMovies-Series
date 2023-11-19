@@ -161,3 +161,11 @@ input {
   border-radius: 5px;
   background-color: #efd510;
 }
+
+::-webkit-scrollbar {
+  background: #000;
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #888;
+}

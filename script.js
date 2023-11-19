@@ -3,68 +3,58 @@ let input = document.getElementById("searchInput");
 let valueInput = null;
 let img = document.getElementById("imgMovie");
 let searchMoviesDiv = document.getElementById("showMovies");
-let infoTextMovie = document.getElementById("info");
-let resturnTextMovies = document.getElementById("movieInfos");
-
-/*const response = () => {
-  let api = `http://www.omdbapi.com/?s=${valueInput}&apikey=${apikey}`;
-  fetch(api)
-    .then((response) => response.json())
-    .then((data) => {
-      let image = document.createElement("img");
-      image.setAttribute("src", ``);
-    });
-};*/
+let returnTextMovie = document.getElementById("movieInfos");
 
 const clickContainer = () => {
   document.addEventListener("click", (evt) => {
-    let target = evt.target.className;
     let idTarget = evt.target.id;
 
     let view = document.getElementById("showContent");
     view.style.display = "flex";
-    let setTimeName = input.value;
 
-    if (
-      target != "infoMovies" &&
-      target != "nameMoviePoster" &&
-      target != "posterImage" &&
-      idTarget != "searchInput"
-    ) {
-      input.value = "";
-      view.style.display = "none";
-    } else if (setTimeName == "") {
-      view.style.display = "none";
-    } else {
+    if (idTarget == "searchInput") {
       view.style.display = "flex";
+    } else {
+      input.value = "";
+      valueInput = "";
+
+      view.style.display = "none";
     }
   });
 };
 
 const hiddenList = (response) => {
   let listMovies = document.getElementById("showContent");
+  let ShowimageNotFound = document.getElementById("imgMovie");
+  let hideInfos = document.getElementById("movieInfos");
 
   let trueResponse = response.Response;
 
   if (trueResponse === "True") {
     listMovies.style.display = "flex";
-  } else {
+  } else if (trueResponse === "False") {
     listMovies.style.display = "none";
   }
   clickContainer();
 };
+/*hideInfos.style.display = "flex";
+    ShowimageNotFound.style.width = "40%";*/
 
+/*ShowimageNotFound.innerHTML = `<div><img src="./src/png/popcorn.png"/></div>`;
+    ShowimageNotFound.style.width = "100%";
+    hideInfos.style.display = "none";*/
 const onloadMovie = (movieName) => {
   let api = `http://www.omdbapi.com/?${movieName}&apikey=${apikey}`;
   fetch(api)
     .then((response) => response.json())
     .then((data) => {
       img.innerHTML = "";
-      resturnTextMovies.innerHTML = "";
+      returnTextMovie.innerHTML = "";
       let image = document.createElement("img");
       let divStars = document.createElement("div");
       let divRating = document.createElement("div");
       let showMovies = document.getElementById("showContent");
+
       let paragraphRating = document.createElement("p");
       divRating.setAttribute("class", "ratingContainer");
       divStars.setAttribute("class", "starsContent");
@@ -119,7 +109,7 @@ const onloadMovie = (movieName) => {
       divTitle.setAttribute("class", "yearTitle");
       let genres = data.Genre;
       let splitGenres = genres.split(",");
-      resturnTextMovies.append(divTitle);
+      returnTextMovie.append(divTitle);
       splitGenres.map((element) => {
         let eachDiv = document.createElement("div");
         let pGenre = document.createElement("p");
@@ -128,14 +118,14 @@ const onloadMovie = (movieName) => {
         pGenre.append(element);
         eachDiv.append(pGenre);
         divGenre.append(eachDiv);
-        resturnTextMovies.append(divGenre);
+        returnTextMovie.append(divGenre);
       });
       if (data.Plot != "N/A") {
         pPlot.append(data.Plot);
         pPlot.setAttribute("class", "alightStart");
         plotDiv.append(pPlot);
         plotDiv.setAttribute("class", "marginTop");
-        resturnTextMovies.append(plotDiv);
+        returnTextMovie.append(plotDiv);
       }
       pStars.append(`Stars: ${data.Actors}`);
       pStars.setAttribute("class", "marginTop");
@@ -171,22 +161,22 @@ const onloadMovie = (movieName) => {
       pDirector.style.marginTop = "10px";
       director.style.display = "flex";
       director.style.width = "100%";
-      resturnTextMovies.append(runTime, starsDiv);
+      returnTextMovie.append(runTime, starsDiv);
       if (nameWriter != `Writer: N/A`) {
         pWriter.append(nameWriter);
         writer.append(pWriter);
-        resturnTextMovies.append(writer);
+        returnTextMovie.append(writer);
       }
       if (nameDirector != `Director: N/A`) {
         pDirector.append(nameDirector);
         director.append(pDirector);
-        resturnTextMovies.append(director);
+        returnTextMovie.append(director);
       }
     });
 };
 
-const loadListMovies = () => {
-  let endpoint = `http://www.omdbapi.com/?s=${valueInput}&apikey=${apikey}`;
+const loadListMovies = (value) => {
+  let endpoint = `http://www.omdbapi.com/?s=${value}&apikey=${apikey}`;
   fetch(endpoint)
     .then((response) => response.json())
 
@@ -201,6 +191,9 @@ const loadListMovies = () => {
         searchContent.map((el) => {
           let poster = el.Poster;
 
+          if (poster === "N/A") {
+            return poster != "N/A";
+          }
           if (poster !== `N/A`) {
             let divPosterMovies = document.createElement("div");
             let nameMovie = document.createElement("p");
@@ -216,6 +209,8 @@ const loadListMovies = () => {
             nameMovie.append(`${el.Title}`);
             divPosterMovies.append(nameMovie);
             contentPostWrite.append(divPosterMovies);
+          } else {
+            contentPostWrite.style.display = "none";
           }
         });
 
@@ -226,7 +221,6 @@ const loadListMovies = () => {
               let child = null;
               if (evt.target.id == "") {
                 child = evt.target.parentNode.id;
-                console.log("el.addEventListener ~ child:", child);
 
                 onloadMovie(`i=${child}`);
               } else {
@@ -252,8 +246,8 @@ document.addEventListener(
 
 const keyDownMovie = () => {
   document.addEventListener("keyup", () => {
-    valueInput = input.value.trim();
-    loadListMovies();
+    valueInput = input.value;
+    loadListMovies(valueInput);
   });
 };
 keyDownMovie();
